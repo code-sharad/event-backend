@@ -19,7 +19,7 @@ const sendWhatsAppMessage = async (phone_number,message) => {
   try {
     let data = JSON.stringify({
       messaging_product: "whatsapp",
-      to: "919552158335",
+      to: phone_number,
       type: "template",
       template: {
         name: "workshop_template",

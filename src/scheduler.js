@@ -3,6 +3,7 @@ const Student = require("./models/Student");
 const Event = require("./models/Event");
 const Lecture = require("./models/Lecture");
 const { sendWhatsAppMessage } = require("./services/whatsappService");
+const { MINUTE, HOUR } = require("./server");
 
 // Weekly event update (every Sunday at 9:00 AM)
 const weeklyEventUpdate = cron.schedule(
@@ -31,9 +32,10 @@ const weeklyEventUpdate = cron.schedule(
   }
 );
 
+
 // Daily lecture reminder (every day at 8:00 AM)
 const dailyLectureReminder = cron.schedule(
-  "11 22 * * *",
+  `${MINUTE} ${HOUR} * * *`,
   async () => {
     console.log("Running a task every day at 8 AM");
 
@@ -57,7 +59,7 @@ const dailyLectureReminder = cron.schedule(
         .join("\n")}`;
 
       for (const student of students) {
-        await sendWhatsAppMessage();
+        await sendWhatsAppMessage(student.phoneNumber);
       }
       console.log("Daily lecture reminder sent successfully");
     } catch (error) {
