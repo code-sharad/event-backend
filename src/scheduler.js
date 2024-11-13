@@ -3,7 +3,6 @@ const Student = require("./models/Student");
 const Event = require("./models/Event");
 const Lecture = require("./models/Lecture");
 const { sendWhatsAppMessage } = require("./services/whatsappService");
-const { MINUTE, HOUR } = require("./server");
 
 // Weekly event update (every Sunday at 9:00 AM)
 const weeklyEventUpdate = cron.schedule(
@@ -32,7 +31,8 @@ const weeklyEventUpdate = cron.schedule(
   }
 );
 
-
+const MINUTE = 29;
+const HOUR = 11;
 // Daily lecture reminder (every day at 8:00 AM)
 const dailyLectureReminder = cron.schedule(
   `${MINUTE} ${HOUR} * * *`,

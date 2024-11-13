@@ -16,8 +16,8 @@ dbConnect().catch(() => {
   console.error("MongoDB connection error:", err);
 });
 
-export let HOUR = 11;
-export let MINUTE = 15;
+let HOUR = 11;
+let MINUTE = 15;
 
 // Routes
 const studentRoutes = require("./routes/studentRoutes");
@@ -31,8 +31,8 @@ app.get("/", (req, res) => {
 app.get("/api/schedule", (req, res) => {
   const { hour, minute } = req.query;
   if (hour && minute) {
-    HOUR = hour;
-    MINUTE = minute;
+    HOUR = Number(hour);
+    MINUTE = Number(minute);
     res.send(`Scheduler started at ${hour}:${minute}`);
   } else {
     res.send(`Scheduler started at ${HOUR}:${MINUTE}`);
@@ -47,3 +47,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   startScheduler();
 });
+
