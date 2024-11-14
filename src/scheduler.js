@@ -3,6 +3,7 @@ const Student = require("./models/Student");
 const Event = require("./models/Event");
 const Lecture = require("./models/Lecture");
 const { sendWhatsAppMessage } = require("./services/whatsappService");
+const { ScheduleTime } = require("./models/ScheduleTime");
 
 // Weekly event update (every Sunday at 9:00 AM)
 const weeklyEventUpdate = cron.schedule(
@@ -31,9 +32,19 @@ const weeklyEventUpdate = cron.schedule(
   }
 );
 
-const MINUTE = 29;
-const HOUR = 11;
+let MINUTE = 2;
+let HOUR = 10;
+
+async function setTime(data) {
+  if (data) {
+    HOUR = data.hour;
+    MINUTE = data.minute;
+  }
+  console.log(HOUR, MINUTE);
+}
+
 // Daily lecture reminder (every day at 8:00 AM)
+
 const dailyLectureReminder = cron.schedule(
   `${MINUTE} ${HOUR} * * *`,
   async () => {
@@ -51,16 +62,19 @@ const dailyLectureReminder = cron.schedule(
         },
       }).sort("startTime");
       console.log(lectures);
-      const message = `Tomorrow's lectures:\n${lectures
-        .map(
-          (lecture) =>
-            `${lecture.subject} - ${lecture.startTime} to ${lecture.endTime}`
-        )
-        .join("\n")}`;
 
-      for (const student of students) {
-        await sendWhatsAppMessage(student.phoneNumber);
+      const workshop = await Event.Workshop.find({
+        date: {
+          $gte: tomorrow,
+        },
+      });
+      console.log(workshop)
+      if (workshop.length > 0) {
+        for (const student of students) {
+          await sendWhatsAppMessage(student.phoneNumber, workshop);
+        }
       }
+
       console.log("Daily lecture reminder sent successfully");
     } catch (error) {
       console.error("Error sending daily lecture reminder:", error);
@@ -75,8 +89,14 @@ const dailyLectureReminder = cron.schedule(
 // Start the scheduler
 function startScheduler() {
   weeklyEventUpdate.start();
-  dailyLectureReminder.start();
+  dailyLectureReminder.start(HOUR, MINUTE);
   console.log("Scheduler started");
 }
 
-module.exports = { startScheduler };
+function stopScheduler() {
+  weeklyEventUpdate.stop();
+  dailyLectureReminder.stop();
+  console.log("Scheduler stopped");
+}
+
+module.exports = { startScheduler, stopScheduler, setTime };
